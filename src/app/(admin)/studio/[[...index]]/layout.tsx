@@ -9,6 +9,7 @@ export const metadata: Metadata = {
 export default function StudioLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="tr">
+      <head />
       <body style={{ margin: 0, padding: 0 }}>
         {children}
       </body>

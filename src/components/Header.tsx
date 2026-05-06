@@ -50,6 +50,7 @@ export default function Header() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
+            width: '100%',
             height: isScrolled ? '70px' : '85px',
             transition: 'height 0.3s ease',
           }}

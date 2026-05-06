@@ -1,10 +1,5 @@
 'use client';
 
-/**
- * @file Sanity Studio Page
- * @description Embedded Sanity Studio for managing content directly within the Next.js app
- */
-
 import dynamic from 'next/dynamic';
 import config from '../../../../../sanity.config';
 

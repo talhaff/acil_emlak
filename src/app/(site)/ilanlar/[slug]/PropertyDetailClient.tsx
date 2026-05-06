@@ -5,7 +5,7 @@
  * @description Interactive property detail view with gallery, features, and WhatsApp conversion
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import {
@@ -22,11 +22,15 @@ interface PropertyDetailClientProps {
 
 export default function PropertyDetailClient({ property }: PropertyDetailClientProps) {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const whatsappUrl = generateWhatsAppUrl(
-    '905551234567',
-    property.title,
-    typeof window !== 'undefined' ? window.location.href : ''
+  const [whatsappUrl, setWhatsappUrl] = useState(
+    generateWhatsAppUrl('905551234567', property.title)
   );
+
+  useEffect(() => {
+    setWhatsappUrl(
+      generateWhatsAppUrl('905551234567', property.title, window.location.href)
+    );
+  }, [property.title]);
 
   const featureItems = [
     { icon: BedDouble, label: 'Oda Sayısı', value: property.features.odaSayisi },
@@ -101,7 +105,7 @@ export default function PropertyDetailClient({ property }: PropertyDetailClientP
           </motion.div>
 
           {/* Content Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: '2rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: '2rem', width: '100%' }}>
             {/* Left Content */}
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }}>
               {/* Title + Location */}

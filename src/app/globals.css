@@ -316,6 +316,7 @@ h1, h2, h3, h4 {
    ======================================== */
 
 .container-custom {
+  width: 100%;
   max-width: 1280px;
   margin: 0 auto;
   padding: 0 1.5rem;
