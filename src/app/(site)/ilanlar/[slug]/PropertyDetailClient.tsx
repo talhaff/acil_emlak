@@ -8,6 +8,8 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
+import { urlForImage } from '@/lib/sanity.image';
 import {
   ArrowLeft, MapPin, BedDouble, Maximize, Thermometer, Building,
   Bath, Fence, Car, ArrowUpDown, MessageCircle, Share2, Heart, ChevronLeft, ChevronRight
@@ -45,6 +47,8 @@ export default function PropertyDetailClient({ property }: PropertyDetailClientP
 
   // Generate placeholder gallery colors
   const galleryColors = Array.from({ length: 4 }, (_, i) => `hsl(${(i * 50 + 210) % 360}, 25%, ${22 + i * 3}%)`);
+  const hasImages = property.gallery && property.gallery.length > 0;
+  const totalImages = hasImages ? property.gallery.length : galleryColors.length;
 
   return (
     <div style={{ paddingTop: '100px', paddingBottom: '4rem', minHeight: '100vh', background: '#f8f9fa' }}>
@@ -63,10 +67,20 @@ export default function PropertyDetailClient({ property }: PropertyDetailClientP
         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }}>
           {/* Gallery Section */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <div style={{ position: 'relative', borderRadius: 'var(--radius-xl)', overflow: 'hidden', height: '450px', background: galleryColors[activeImageIndex % galleryColors.length] }}>
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <BedDouble size={80} color="rgba(255,255,255,0.1)" />
-              </div>
+            <div style={{ position: 'relative', borderRadius: 'var(--radius-xl)', overflow: 'hidden', height: '450px', background: hasImages ? '#0f1929' : galleryColors[activeImageIndex % galleryColors.length] }}>
+              {hasImages ? (
+                <Image
+                  src={urlForImage(property.gallery[activeImageIndex]).url()}
+                  alt={`${property.title} - Fotoğraf ${activeImageIndex + 1}`}
+                  fill
+                  style={{ objectFit: 'contain' }}
+                  priority
+                />
+              ) : (
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <BedDouble size={80} color="rgba(255,255,255,0.1)" />
+                </div>
+              )}
               {/* Status Badge */}
               <div style={{ position: 'absolute', top: '1.5rem', left: '1.5rem', zIndex: 2, display: 'flex', gap: '0.5rem' }}>
                 <span className={`badge badge-${property.propertyType}`} style={{ fontSize: '0.85rem', padding: '0.35rem 1rem' }}>
@@ -77,30 +91,44 @@ export default function PropertyDetailClient({ property }: PropertyDetailClientP
                 </span>
               </div>
               {/* Navigation arrows */}
-              <button onClick={() => setActiveImageIndex((p) => (p - 1 + galleryColors.length) % galleryColors.length)}
+              <button onClick={() => setActiveImageIndex((p) => (p - 1 + totalImages) % totalImages)}
                 style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', width: '44px', height: '44px', borderRadius: '50%', background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}>
                 <ChevronLeft size={22} color="white" />
               </button>
-              <button onClick={() => setActiveImageIndex((p) => (p + 1) % galleryColors.length)}
+              <button onClick={() => setActiveImageIndex((p) => (p + 1) % totalImages)}
                 style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', width: '44px', height: '44px', borderRadius: '50%', background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}>
                 <ChevronRight size={22} color="white" />
               </button>
               {/* Image dots */}
               <div style={{ position: 'absolute', bottom: '1rem', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '0.5rem', zIndex: 2 }}>
-                {galleryColors.map((_, i) => (
+                {Array.from({ length: totalImages }).map((_, i) => (
                   <button key={i} onClick={() => setActiveImageIndex(i)}
                     style={{ width: i === activeImageIndex ? '24px' : '8px', height: '8px', borderRadius: '4px', background: i === activeImageIndex ? '#c9a84c' : 'rgba(255,255,255,0.5)', border: 'none', cursor: 'pointer', transition: 'all 0.3s ease' }} />
                 ))}
               </div>
             </div>
             {/* Thumbnail strip */}
-            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
-              {galleryColors.map((color, i) => (
-                <button key={i} onClick={() => setActiveImageIndex(i)}
-                  style={{ flex: 1, height: '80px', borderRadius: 'var(--radius-md)', background: color, border: i === activeImageIndex ? '3px solid #c9a84c' : '3px solid transparent', cursor: 'pointer', transition: 'border-color 0.3s ease', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <BedDouble size={20} color="rgba(255,255,255,0.15)" />
-                </button>
-              ))}
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+              {hasImages ? (
+                property.gallery.map((image, i) => (
+                  <button key={i} onClick={() => setActiveImageIndex(i)}
+                    style={{ flex: '0 0 auto', width: '120px', height: '80px', borderRadius: 'var(--radius-md)', border: i === activeImageIndex ? '3px solid #c9a84c' : '3px solid transparent', cursor: 'pointer', transition: 'border-color 0.3s ease', overflow: 'hidden', position: 'relative', background: '#0f1929' }}>
+                    <Image
+                      src={urlForImage(image).width(240).height(160).url()}
+                      alt={`Thumbnail ${i + 1}`}
+                      fill
+                      style={{ objectFit: 'cover' }}
+                    />
+                  </button>
+                ))
+              ) : (
+                galleryColors.map((color, i) => (
+                  <button key={i} onClick={() => setActiveImageIndex(i)}
+                    style={{ flex: 1, height: '80px', borderRadius: 'var(--radius-md)', background: color, border: i === activeImageIndex ? '3px solid #c9a84c' : '3px solid transparent', cursor: 'pointer', transition: 'border-color 0.3s ease', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <BedDouble size={20} color="rgba(255,255,255,0.15)" />
+                  </button>
+                ))
+              )}
             </div>
           </motion.div>
 

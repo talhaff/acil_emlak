@@ -1,7 +1,9 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
+import { urlForImage } from '@/lib/sanity.image';
 import { MapPin, Maximize, BedDouble, ArrowUpRight } from 'lucide-react';
 import { formatPrice, formatArea, getPropertyTypeLabel } from '@/lib/formatters';
 import type { IPropertyCard } from '@/types';
@@ -13,6 +15,7 @@ interface PropertyCardProps {
 
 export default function PropertyCard({ property, index }: PropertyCardProps) {
   const isSold = property.status === 'satildi' || property.status === 'kiralandi';
+  const hasImages = property.gallery && property.gallery.length > 0;
 
   return (
     <motion.div
@@ -24,13 +27,23 @@ export default function PropertyCard({ property, index }: PropertyCardProps) {
       <Link href={`/ilanlar/${property.slug.current}`} style={{ textDecoration: 'none', display: 'block' }}>
         <div className="card" style={{ position: 'relative', opacity: isSold ? 0.75 : 1 }}>
           <div style={{ position: 'relative', width: '100%', height: '240px', overflow: 'hidden' }}>
-            <div style={{
-              position: 'absolute', inset: 0,
-              background: `linear-gradient(135deg, hsl(${(index * 40 + 200) % 360}, 25%, 20%) 0%, hsl(${(index * 40 + 230) % 360}, 30%, 30%) 100%)`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <BedDouble size={48} color="rgba(255,255,255,0.15)" />
-            </div>
+            {hasImages ? (
+              <Image
+                src={urlForImage(property.gallery[0]).width(600).height(400).url()}
+                alt={property.title}
+                fill
+                style={{ objectFit: 'cover', transition: 'transform 0.5s ease' }}
+                className="hover-scale"
+              />
+            ) : (
+              <div style={{
+                position: 'absolute', inset: 0,
+                background: `linear-gradient(135deg, hsl(${(index * 40 + 200) % 360}, 25%, 20%) 0%, hsl(${(index * 40 + 230) % 360}, 30%, 30%) 100%)`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <BedDouble size={48} color="rgba(255,255,255,0.15)" />
+              </div>
+            )}
             <div style={{ position: 'absolute', top: '1rem', left: '1rem', zIndex: 2 }}>
               <span className={`badge badge-${property.propertyType}`}>
                 {getPropertyTypeLabel(property.propertyType)}
